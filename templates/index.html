@@ -58,14 +58,16 @@
             let inputText = document.getElementById("userInput").value;
             if (!inputText.trim()) return;
             
-            fetch("/ask", { // Updated to point to the Flask endpoint
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+            // Show loading message
+            document.getElementById("response").innerText = "Thinking...";
+            
+            fetch("/ask", {
+                method: "POST",                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: inputText })
             })
             .then(response => response.json())
             .then(data => {
-                const message = data.choices[0].message.content;
+                const message = data.reply;
                 document.getElementById("response").innerText = message || "No response received.";
             })
             .catch(error => {

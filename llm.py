@@ -20,7 +20,7 @@ def api_call(prompt):
             model="tenstorrent/Meta-Llama-3.1-70B-Instruct",
             max_tokens=128,
         )
-        return chat_completion.to_json(indent=4)
+        return chat_completion.choices[0].message.content
     except Exception as e:
         print(f"Error: {e}")
         return json.dumps({"error": str(e)})

@@ -1,13 +1,20 @@
-from data import update_tt_metal_repo, search_repo
+from data import search_repo
 from llm import api_call
-
 
 def get_search_terms(question):
     """
     Extract some good search terms from the user's question
     """
-    # FIXME: use an LLM
-    return question.split()
+    prompt = f"""
+    To answer the user's question we are first going extract good search terms. These terms will be grepped for in a large codebase, so they must be specific and literal.
+    Return each search term on a new line with no other text. Do not create lots of redundant terms, be specific and do not invent things the user did not mention.
+    If there is only one obvious term, just use that one term.
+
+    User's question: {question}
+    """
+    answer = api_call(prompt)
+    return [answer.strip() for answer in answer.split('\n') if answer.strip()]
+
 
 def get_search_results(search_terms):
     """
@@ -30,3 +37,10 @@ def get_answer(question, search_results):
     """
     return api_call(prompt)
 
+def answer_question(question):
+    """
+    Answer a question using the tt-metal repo
+    """
+    search_terms = get_search_terms(question)
+    search_results = get_search_results(search_terms)
+    return get_answer(question, search_results)

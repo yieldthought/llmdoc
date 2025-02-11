@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import json
-from llm import api_call
+from logic import answer_question
 app = Flask(__name__)
 
 @app.route('/')
@@ -14,9 +14,19 @@ def ask():
     if not user_input:
         return jsonify({"reply": "Invalid input."})
     
-    response = api_call(user_input)
-    response_json = json.loads(response)  # Parse the JSON string
-    return jsonify(response_json)
+    try:
+        response = answer_question(user_input)
+        # Add type checking and convert to string if needed
+        if not isinstance(response, str):
+            response = str(response)
+        
+        # Add debug print
+        print(f"Response type: {type(response)}, Value: {response}")
+        
+        return jsonify({"reply": response})
+    except Exception as e:
+        print(f"Error during jsonify: {str(e)}")
+        return jsonify({"reply": "An error occurred.", "error": str(e)})
 
 if __name__ == '__main__':
     app.run(debug=True)
