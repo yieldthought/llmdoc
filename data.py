@@ -79,6 +79,7 @@ def search_repo(search_string, tt_metal_path=None):
     Returns:
         list: List of dictionaries containing file path and matching content
     """
+    ensure_tt_metal_repo()
     if tt_metal_path is None:
         tt_metal_path = os.path.join('data', 'tt-metal')
     
