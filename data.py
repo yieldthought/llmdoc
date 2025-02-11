@@ -64,8 +64,13 @@ def update_tt_metal_repo():
 
 def search_repo(search_string, tt_metal_path=None):
     """
-    Search the repository for a given string using grep.
-    Returns matches with 10 lines of context above and below, limited to 10 matches.
+    Search the repository for a given string using grep, prioritizing different directories.
+    Returns matches with 10 lines of context above and below.
+    
+    Searches in order of priority:
+    1. tech-reports/ (up to 5 matches)
+    2. models/demos/ (up to 5 matches)
+    3. Other directories (up to 5 matches)
     
     Args:
         search_string (str): The string to search for
@@ -81,56 +86,100 @@ def search_repo(search_string, tt_metal_path=None):
         print(f"Repository not found at {tt_metal_path}")
         return []
     
+    def search_directory(dir_path, max_matches=5):
+        try:
+            # Use grep with directory-specific search
+            result = subprocess.run([
+                'grep',
+                '-r',
+                '-n',
+                '-B', '10',
+                '-A', '10',
+                '-m', str(max_matches),
+                '--color=never',
+                search_string,
+                dir_path
+            ], capture_output=True, text=True)
+            
+            matches = result.stdout.split('--')
+            processed_matches = []
+            
+            for match in matches:
+                if not match.strip():
+                    continue
+                    
+                lines = match.strip().split('\n')
+                if not lines or ':' not in lines[0]:
+                    continue
+                    
+                file_path, _ = lines[0].split(':', 1)
+                processed_matches.append({
+                    'file': file_path,
+                    'content': match.strip()
+                })
+            
+            return processed_matches
+            
+        except subprocess.CalledProcessError:
+            return []
+    
+    # Search in priority order
+    tech_reports_path = os.path.join(tt_metal_path, 'tech-reports')
+    demos_path = os.path.join(tt_metal_path, 'models', 'demos')
+    
+    results = []
+    
+    # 1. Search tech-reports
+    if os.path.exists(tech_reports_path):
+        results.extend(search_directory(tech_reports_path))
+    
+    # 2. Search models/demos
+    if os.path.exists(demos_path):
+        results.extend(search_directory(demos_path))
+    
+    # 3. Search everything else (excluding previous directories)
     try:
-        # Use grep with:
-        # -r: recursive search
-        # -l: show file names
-        # -n: show line numbers
-        # -B 10: show 10 lines before match
-        # -A 10: show 10 lines after match
-        # -m 10: stop after 10 matches
-        # --color=never: disable color output
+        # Create a temporary file with exclude patterns
+        exclude_file = '.grep_exclude'
+        with open(exclude_file, 'w') as f:
+            f.write('tech-reports/*\n')
+            f.write('models/demos/*\n')
+        
+        # Search with exclusions
         result = subprocess.run([
             'grep',
             '-r',
             '-n',
             '-B', '10',
             '-A', '10',
-            '-m', '10',
+            '-m', '5',
             '--color=never',
+            '--exclude-from=' + exclude_file,
             search_string,
             tt_metal_path
         ], capture_output=True, text=True)
         
-        # Split output into separate match groups
         matches = result.stdout.split('--')
-        
-        # Process matches into a more structured format
-        processed_matches = []
         for match in matches:
             if not match.strip():
                 continue
                 
             lines = match.strip().split('\n')
-            if not lines:
+            if not lines or ':' not in lines[0]:
                 continue
                 
-            # First line contains file name and line number
-            first_line = lines[0]
-            if ':' not in first_line:
-                continue
-                
-            file_path, _ = first_line.split(':', 1)
-            
-            processed_matches.append({
+            file_path, _ = lines[0].split(':', 1)
+            results.append({
                 'file': file_path,
                 'content': match.strip()
             })
         
-        return processed_matches
+        # Clean up temporary file
+        os.remove(exclude_file)
         
-    except subprocess.CalledProcessError as e:
-        print(f"Error searching repository: {e}")
-        return []
+    except (subprocess.CalledProcessError, OSError) as e:
+        print(f"Error during general search: {e}")
+    
+    return results
 
 
