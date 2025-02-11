@@ -1,5 +1,5 @@
 from data import update_tt_metal_repo, search_repo
-from openai import OpenAI
+from llm import api_call
 
 
 def get_search_terms(question):
@@ -23,29 +23,10 @@ def get_answer(question, search_results):
     """
     Use an LLM to answer the question based on the search results
     """
-    client = OpenAI()
-    
-    # Prepare context from search results
-    context = "\n\n".join(search_results)
-    
-    # Construct the prompt
-    prompt = f"""Given the following context from a technical documentation:
-
-{context}
-
-Please answer this question in detail, providing 2-3 examples where applicable:
-{question}"""
-
-    # Call the OpenAI API
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a helpful technical assistant that provides detailed answers with examples."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.7,
-        max_tokens=1000
-    )
-    
-    return response.choices[0].message.content
+    prompt = f"""
+    Given the following search results, answer the question:
+    {search_results}
+    Question: {question}
+    """
+    return api_call(prompt)
 
