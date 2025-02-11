@@ -71,7 +71,7 @@ def parse_grep_output(output):
     Each line in a group begins with the filename plus a separator (':' for a match
     or '-' for a context line). Instead of parsing each line individually, this function:
     
-      1. Finds the group’s filename by identifying the line that has the earliest colon.
+      1. Finds the group's filename by identifying the line that has the earliest colon.
       2. Uses that filename prefix to trim that many characters (plus one for the separator)
          from every line in the group.
       3. Aggregates the trimmed lines as the file's content.
@@ -197,12 +197,12 @@ def search_repo(search_string, tt_metal_path=None):
     # 1. Search tech-reports
     tech_reports_path = os.path.join(tt_metal_path, 'tech-reports')
     if os.path.exists(tech_reports_path):
-        results.extend(run_grep_search(search_string, tech_reports_path))
+        results.extend(run_grep_search(search_string, tech_reports_path, max_matches=5))
     
     # 2. Search models/demos
     demos_path = os.path.join(tt_metal_path, 'models', 'demos')
     if os.path.exists(demos_path):
-        results.extend(run_grep_search(search_string, demos_path))
+        results.extend(run_grep_search(search_string, demos_path, max_matches=5))
     
     # 3. Search everything else (excluding previous directories)
     try:
@@ -216,60 +216,8 @@ def search_repo(search_string, tt_metal_path=None):
         results.extend(run_grep_search(
             search_string,
             tt_metal_path,
-            exclude_file=exclude_file
-        ))
-        
-        # Clean up temporary file
-        os.remove(exclude_file)
-        
-    except OSError as e:
-        print(f"Error during general search: {e}")
-    
-    return results
-
-
-def search_repo(search_string, tt_metal_path=None):
-    """
-    Search the repository for a given string using grep, prioritizing different directories.
-    Returns matches with 10 lines of context above and below.
-    
-    Searches in order of priority:
-    1. tech-reports/ (up to 5 matches)
-    2. models/demos/ (up to 5 matches)
-    3. Other directories (up to 5 matches)
-    """
-    if tt_metal_path is None:
-        tt_metal_path = os.path.join('data', 'tt-metal')
-    
-    if not os.path.exists(tt_metal_path):
-        print(f"Repository not found at {tt_metal_path}")
-        return []
-    
-    results = []
-    
-    # 1. Search tech-reports
-    tech_reports_path = os.path.join(tt_metal_path, 'tech-reports')
-    if os.path.exists(tech_reports_path):
-        results.extend(run_grep_search(search_string, tech_reports_path))
-    
-    # 2. Search models/demos
-    demos_path = os.path.join(tt_metal_path, 'models', 'demos')
-    if os.path.exists(demos_path):
-        results.extend(run_grep_search(search_string, demos_path))
-    
-    # 3. Search everything else (excluding previous directories)
-    try:
-        # Create a temporary file with exclude patterns
-        exclude_file = '.grep_exclude'
-        with open(exclude_file, 'w') as f:
-            f.write('tech-reports/*\n')
-            f.write('models/demos/*\n')
-        
-        # Search with exclusions
-        results.extend(run_grep_search(
-            search_string,
-            tt_metal_path,
-            exclude_file=exclude_file
+            exclude_file=exclude_file,
+            max_matches=5
         ))
         
         # Clean up temporary file
