@@ -37,14 +37,11 @@ def index():
 def ask():
     data = request.json
     user_input = data.get("prompt")
-    print(f"Miguel: user input = {user_input}")
     if not user_input:
         return jsonify({"reply": "Invalid input."})
     
     response = api_call(user_input)
-    print(f"Miguel: Response = {response}")
     response_json = json.loads(response)  # Parse the JSON string
-    print(f"Miguel: JSON Response = {response}")
     return jsonify(response_json)
 
 if __name__ == '__main__':
