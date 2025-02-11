@@ -50,10 +50,25 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
+        .example-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #bb86fc;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .example-button:hover {
+            background-color: #9b6fcf;
+        }
     </style>
 </head>
 <body>
-    <h2>Ask the AI</h2>
+    <button class="example-button" onclick="sendExamplePrompt()">Example prompt</button>
+    <h2>Ask me about TT-Metal</h2>
     <input type="text" id="userInput" placeholder="Type something..." onkeypress="handleKeyPress(event)">
     <div id="response" class="response-box"></div>
 
@@ -63,6 +78,11 @@
                 event.preventDefault();
                 sendToLLM();
             }
+        }
+
+        function sendExamplePrompt() {
+            document.getElementById("userInput").value = "What does ttnn.linear do";
+            sendToLLM();
         }
 
         function sendToLLM() {
