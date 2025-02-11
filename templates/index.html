@@ -58,14 +58,15 @@
             let inputText = document.getElementById("userInput").value;
             if (!inputText.trim()) return;
             
-            fetch("https://api.example.com/llm", { // Replace with actual LLM API
+            fetch("/ask", { // Updated to point to the Flask endpoint
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: inputText })
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("response").innerText = data.reply || "No response received.";
+                const message = data.choices[0].message.content;
+                document.getElementById("response").innerText = message || "No response received.";
             })
             .catch(error => {
                 console.error("Error:", error);
