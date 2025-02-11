@@ -35,16 +35,27 @@
         input:focus {
             box-shadow: 0 0 10px #bb86fc;
         }
-        p {
+        .response-box {
             margin-top: 20px;
             font-size: 1.2rem;
+            width: 80%;
+            max-width: 400px;
+            max-height: 200px;
+            padding: 10px;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            border: 1px solid #bb86fc;
+            border-radius: 5px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
     </style>
 </head>
 <body>
     <h2>Ask the AI</h2>
     <input type="text" id="userInput" placeholder="Type something..." onkeypress="handleKeyPress(event)">
-    <p id="response"></p>
+    <div id="response" class="response-box"></div>
 
     <script>
         function handleKeyPress(event) {
@@ -62,7 +73,8 @@
             document.getElementById("response").innerText = "Thinking...";
             
             fetch("/ask", {
-                method: "POST",                headers: { "Content-Type": "application/json" },
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: inputText })
             })
             .then(response => response.json())
