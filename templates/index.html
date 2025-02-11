@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM API Input</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 80%;
+            max-width: 400px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            outline: none;
+        }
+        input:focus {
+            box-shadow: 0 0 10px #bb86fc;
+        }
+        p {
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <h2>Ask the AI</h2>
+    <input type="text" id="userInput" placeholder="Type something..." onkeypress="handleKeyPress(event)">
+    <p id="response"></p>
+
+    <script>
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendToLLM();
+            }
+        }
+
+        function sendToLLM() {
+            let inputText = document.getElementById("userInput").value;
+            if (!inputText.trim()) return;
+            
+            fetch("https://api.example.com/llm", { // Replace with actual LLM API
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: inputText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("response").innerText = data.reply || "No response received.";
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                document.getElementById("response").innerText = "Error fetching response.";
+            });
+        }
+    </script>
+</body>
+</html>
