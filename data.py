@@ -168,7 +168,9 @@ def run_grep_search(search_pattern, search_path, context_before=10, context_afte
             print(f"Error running grep: {result.stderr}")
             return []
         
-        return parse_grep_output(result.stdout)
+        # Enforce max_matches limit on the parsed results
+        matches = parse_grep_output(result.stdout)
+        return matches[:max_matches]
         
     except subprocess.SubprocessError as e:
         print(f"Error during grep search: {e}")
