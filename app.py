@@ -14,19 +14,8 @@ def ask():
     if not user_input:
         return jsonify({"reply": "Invalid input."})
     
-    try:
-        response = answer_question(user_input)
-        # Add type checking and convert to string if needed
-        if not isinstance(response, str):
-            response = str(response)
-        
-        # Add debug print
-        print(f"Response type: {type(response)}, Value: {response}")
-        
-        return jsonify({"reply": response})
-    except Exception as e:
-        print(f"Error during jsonify: {str(e)}")
-        return jsonify({"reply": "An error occurred.", "error": str(e)})
+    response = answer_question(user_input)    
+    return jsonify({"reply": response})
 
 if __name__ == '__main__':
     app.run(debug=True)
